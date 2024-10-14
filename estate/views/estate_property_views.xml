@@ -23,9 +23,11 @@
             <field name="model">estate.property</field>
             <field name="arch" type="xml">
                 <form string="Property">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
+                    </header>
                     <sheet>
                         <div class="oe_title">
-                            <label for="name"/>
                             <h1><field name="name" class="oe_inline"/></h1>
                         </div>
                         <group>
@@ -41,19 +43,40 @@
                         <notebook>
                             <page string="Description">
                                 <group>
-                                    <field name="description"/>
-                                    <field name="bedrooms"/>
-                                    <field name="living_area"/>
-                                    <field name="facades"/>
-                                    <field name="garage"/>
-                                    <field name="garden"/>
-                                    <field name="garden_area"/>
-                                    <field name="garden_orientation"/>
+                                    <group>
+                                        <field name="description"/>
+                                        <field name="bedrooms"/>
+                                        <field name="living_area"/>
+                                        <field name="facades"/>
+                                        <field name="garage"/>
+                                        <field name="garden"/>
+                                        <field name="garden_area"/>
+                                        <field name="garden_orientation"/>
+                                    </group>
                                 </group>
                             </page>
                         </notebook>
                     </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id="estate_property_view_search" model="ir.ui.view">
+            <field name="name">estate.property.view.search</field>
+            <field name="model">estate.property</field>
+            <field name="arch" type="xml">
+                <search string="Properties">
+                    <field name="name"/>
+                    <field name="postcode"/>
+                    <field name="expected_price"/>
+                    <field name="bedrooms"/>
+                    <field name="living_area"/>
+                    <field name="facades"/>
+                    <filter string="Available" name="available" domain="[('state', 'in', ['new', 'offer_received'])]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Postcode" name="postcode" context="{'group_by': 'postcode'}"/>
+                    </group>
+                </search>
             </field>
         </record>
 
