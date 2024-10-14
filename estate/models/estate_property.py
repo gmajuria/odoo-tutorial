@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 class EstateProperty(models.Model):
     _name = 'estate.property'
-    _description = 'Estate Property'
+    _description = 'Property'
 
     name = fields.Char(string='Title', required=True)
     description = fields.Text(string='Description')
@@ -23,3 +23,11 @@ class EstateProperty(models.Model):
     garden_orientation = fields.Selection([('north', 'North'), ('south', 'South'), ('east', 'East'), ('west', 'West')], string='Garden Orientation')
     active = fields.Boolean(string='Active', default=True)
     state = fields.Selection([('new', 'New'), ('offer_received', 'Offer Received'), ('offer_accepted', 'Offer Accepted'), ('sold', 'Sold'), ('canceled', 'Canceled')], string='State', required=True, copy=False, default='new')
+    property_type_id = fields.Many2one('estate.property.type', string='Property Type')
+
+
+class EstatePropertyType(models.Model):
+    _name = 'estate.property.type'
+    _description = 'Property Type'
+
+    name = fields.Char(string='Name', required=True)
