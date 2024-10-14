@@ -27,6 +27,7 @@ class EstateProperty(models.Model):
     partner_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     user_id = fields.Many2one('res.users', string='Salesman', default=lambda self: self.env.user)
     property_tag_ids = fields.Many2many('estate.property.tag', string='Property Tags')
+    property_offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Property Offers')
 
 class EstatePropertyType(models.Model):
     _name = 'estate.property.type'
@@ -40,3 +41,13 @@ class EstatePropertyTag(models.Model):
     _description = 'Property Tag'
 
     name = fields.Char(string='Name', required=True)
+
+
+class EstatePropertyOffer(models.Model):
+    _name = 'estate.property.offer'
+    _description = 'Property Offer'
+
+    price = fields.Float(string='Price')
+    status = fields.Selection([('accepted', 'Accepted'), ('refused', 'Refused')], string='Status', copy=False)
+    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
+    property_id = fields.Many2one('estate.property', string='Property', required=True)
