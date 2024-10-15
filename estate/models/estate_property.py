@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields
+from odoo import models, fields, api
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
@@ -28,6 +29,23 @@ class EstateProperty(models.Model):
     user_id = fields.Many2one('res.users', string='Salesman', default=lambda self: self.env.user)
     property_tag_ids = fields.Many2many('estate.property.tag', string='Property Tags')
     property_offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Property Offers')
+    total_area = fields.Float(compute='_compute_total_area', string='Total Area (sqm)')
+    best_price = fields.Float(compute='_compute_best_price', string='Best Offer')
+
+    @api.depends('living_area', 'garden_area')
+    def _compute_total_area(self):
+        for rec in self:
+            rec.total_area = rec.living_area + rec.garden_area
+
+    @api.depends('property_offer_ids.price')
+    def _compute_best_price(self):
+        for rec in self:
+            best_price = 0.0
+            if rec.property_offer_ids:
+                sorted_offers = rec.property_offer_ids.sorted(key='price', reverse=True)
+                best_price = sorted_offers[0].price
+            rec.best_price = best_price
+
 
 class EstatePropertyType(models.Model):
     _name = 'estate.property.type'
@@ -51,3 +69,17 @@ class EstatePropertyOffer(models.Model):
     status = fields.Selection([('accepted', 'Accepted'), ('refused', 'Refused')], string='Status', copy=False)
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
     property_id = fields.Many2one('estate.property', string='Property', required=True)
+    validity = fields.Integer(string='Validity (days)', default=7)
+    date_deadline = fields.Date(compute='_compute_date_deadline', inverse='_inverse_date_deadline', string='Date Deadline')
+
+    @api.depends('validity')
+    def _compute_date_deadline(self):
+        for rec in self:
+            rec.date_deadline = (rec.create_date or fields.Date.today()) + relativedelta(days=rec.validity)
+
+    def _inverse_date_deadline(self):
+        for rec in self:
+            validity = 0
+            if rec.date_deadline and rec.create_date:
+                validity = (rec.date_deadline - rec.create_date.date()).days
+            rec.validity = validity
